@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Resto.Front.Api;
 using Resto.Front.Api.Attributes;
 using Resto.Front.Api.Attributes.JetBrains;
 using Resto.Front.Api.Exceptions;
@@ -18,8 +17,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             {
                 foreach (IDisposable subscription in subscriptions)
                 {
-                    if (subscription != null)
-                        subscription.Dispose();
+                    subscription?.Dispose();
                 }
             }
         }

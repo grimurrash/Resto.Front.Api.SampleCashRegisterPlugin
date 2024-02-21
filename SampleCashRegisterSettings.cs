@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Resto.Front.Api.Data.Device.Settings;
 
 namespace Resto.Front.Api.SampleCashRegisterPlugin

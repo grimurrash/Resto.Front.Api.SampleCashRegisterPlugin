@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Resto.Front.Api;
 using Resto.Front.Api.Attributes.JetBrains;
 using Resto.Front.Api.Data.Device;
 using Resto.Front.Api.Data.Device.Results;
@@ -10,9 +9,10 @@ using Resto.Front.Api.Data.Device.Tasks;
 using Resto.Front.Api.Devices;
 using Resto.Front.Api.UI;
 using Resto.Front.Api.Data.Security;
-using System.Windows.Forms;
-using KasaGE;
 using KasaGE.Commands;
+using System.Security.Cryptography;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Resto.Front.Api.SampleCashRegisterPlugin
 {
@@ -122,8 +122,10 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <see cref="ChequeTask.TableNumber"/> Номер стола заказа<para />
         /// <see cref="ChequeTask.TextBeforeCheque"/> Текст, который должен быть распечатан после тела чека, может быть пустым<para />
         /// <see cref="ChequeTask.Sales"/> Список предметов расчёта<para />
-        /// <see cref="ChequeTask.RoundSum"/> Сумма округления копеек, скидка содержится в поле <see cref="ChequeTask.DiscountSum"/>, <para />
-        /// <see cref="ChequeTask.OfdEmail"/> Адрес электронной почты покупателя, на который будет отправлен электронный чек, имеет более высокий приоритет, чем <see cref="ChequeTask.OfdPhoneNumber"/> ,<para />
+        /// <see cref="ChequeTask.RoundSum"/> Сумма округления копеек, скидка содержится в поле 
+        /// <see cref="ChequeTask.DiscountSum"/>, <para />
+        /// <see cref="ChequeTask.OfdEmail"/> Адрес электронной почты покупателя, на который будет отправлен электронный чек, имеет более высокий приоритет, чем 
+        /// <see cref="ChequeTask.OfdPhoneNumber"/> ,<para />
         /// <see cref="ChequeTask.OfdPhoneNumber"/> Номер телефона покупателя, на который будет отправлен электронный чек<para />
         /// <see cref="ChequeTask.CashPayment"/> Сумма оплаты наличными<para />
         /// <see cref="ChequeTask.CardPayments"/> Список оплат, кроме наличных, список типов оплат должен быть синхронизированы с идентификаторами оплат на ФР посредством настроек в BackOffice<para />
@@ -153,27 +155,37 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                         PluginContext.Log.InfoFormat("CardPayments register id {0} (148)", type.PaymentRegisterId);
                         card = true;
                     }
-                    PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed. (151)", DeviceName, deviceId);
+                    PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed start. (151)", DeviceName, deviceId);
                     var recT = ReceiptType.Sale;
+
                     if (chequeTask.IsRefund && card == false)
                     {
                         recT = ReceiptType.Return;
                     }
+
                     if (card == false)
                     {
-                        FR.openFiscal("007", "7", recT);
-                        FR.addTextFiscal(chequeTask.TextAfterCheque);
-                        for (int i = 0; i < chequeTask.Sales.Count; i++)
+                        PluginContext.Log.InfoFormat("Sales {0}", JsonConvert.SerializeObject(chequeTask));
+                        bool isRound = true;
+                        if (chequeTask.RoundSum != null && chequeTask.RoundSum > 0)
                         {
-                            if (chequeTask.Sales.ElementAt(i).Price == null || chequeTask.Sales.ElementAt(i).Price == 0)
+                            isRound = false;
+                        }
+
+                        FR.OpenFiscal("007", "7", recT);
+                        FR.AddTextFiscal(chequeTask.TextAfterCheque);
+                        PluginContext.Log.InfoFormat("Start print sales");
+                        foreach (ChequeSale sale in chequeTask.Sales) {
+                            PluginContext.Log.InfoFormat("Sales {0}", JsonConvert.SerializeObject(sale)); 
+                            decimal price = sale.Sum ?? 0;
+                            decimal amount = sale.Amount ?? 1;
+                            decimal discountSum = sale.DiscountSum ?? 0;
+                            decimal increaseSum = sale.IncreaseSum ?? 0;
+                            if (price > 0 && amount > 0)
                             {
-                                continue;
+                                price /= amount;
                             }
-                            decimal price = (decimal)chequeTask.Sales.ElementAt(i).Sum;
-                            if (chequeTask.Sales.ElementAt(i).Amount != null)
-                            {
-                                price = (decimal)chequeTask.Sales.ElementAt(i).Sum / (decimal)chequeTask.Sales.ElementAt(i).Amount;
-                            }
+
                             /*if (chequeTask.Sales.ElementAt(i).DiscountSum != null && chequeTask.Sales.ElementAt(i).DiscountSum != 0)
                             {
                                 if (chequeTask.Sales.ElementAt(i).Amount != null)
@@ -185,6 +197,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                                     price -= (decimal)chequeTask.Sales.ElementAt(i).DiscountSum;
                                 }
                             }
+
                             if (chequeTask.Sales.ElementAt(i).IncreaseSum != null && chequeTask.Sales.ElementAt(i).IncreaseSum != 0)
                             {
                                 if (chequeTask.Sales.ElementAt(i).Amount != null)
@@ -196,7 +209,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                                     price += (decimal)chequeTask.Sales.ElementAt(i).IncreaseSum;
                                 }
                             }*/
-                            if (chequeTask.RoundSum != null && chequeTask.RoundSum != 0)
+
+                            if (isRound)
                             {
                                 price = Math.Round(price);
                             }
@@ -204,40 +218,37 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                             {
                                 price = Math.Round(price, 2);
                             }
-                            if (chequeTask.Sales.ElementAt(i).Amount != null)
-                            {
-                                FR.addItemFiscal(chequeTask.Sales.ElementAt(i).Name, price, (decimal)chequeTask.Sales.ElementAt(i).Amount);
-                            }
-                            else
-                            {
-                                FR.addItemFiscal(chequeTask.Sales.ElementAt(i).Name, price, 1.00M);
-                            }
+
+                            FR.AddItemFiscalNotDiscount(sale.Name, price, amount);
                         }
-                        FR.addTextFiscal(chequeTask.TextBeforeCheque);
-                        FR.printFiscal();
+                        PluginContext.Log.InfoFormat("End print sales");
+                        FR.AddTextFiscal(chequeTask.TextBeforeCheque);
+                        FR.PrintFiscal();
                     }
                 }
                 else
                 {
-                    FR.addTask("fiscal", chequeTask);
+                    FR.AddTask(chequeTask);
                 }
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed. (176)", DeviceName, deviceId);
                 return GetCashRegisterData();
             }
-            catch(Exception ex)
+            catch(NullReferenceException ex)
             {
                 PluginContext.Log.WarnFormat("Device: '{0} ({1})': {2} (287) details {3}", DeviceName, deviceId, ex.Message, ex.InnerException.Message);
-                throw new Exception(ex.Message);
-               
+                return GetCashRegisterData();
             }
-               
-               
+            catch (Exception ex)
+            {
+                PluginContext.Log.WarnFormat("Device: '{0} ({1})': {2} (287) details {3}", DeviceName, deviceId, ex.Message, ex.InnerException.Message);
+                return GetCashRegisterData();
+            }
         }
 
         public void LogLastError()
         {
-            var error = FR.getLastError();
-            if (error!="")
+            var error = FR.GetLastError();
+            if (error != "")
             {
                 PluginContext.Log.WarnFormat("Device: '{0} ({1})' ErrorCodeFR: {2} (185)", DeviceName, deviceId, error);
             }
@@ -276,7 +287,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// </returns>
         public CashRegisterResult DoZReport(string cashierName, string cashierTaxpayerId, bool printEklzReport, IViewManager viewManager)
         {
-            FR.printReport(ReportType.Z);
+            FR.PrintReport(ReportType.Z);
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (223)", DeviceName, deviceId);
             return GetCashRegisterData();
         }
@@ -302,7 +313,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public CashRegisterResult DoXReport(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
         {
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (247)", DeviceName, deviceId);
-                FR.printReport(KasaGE.Commands.ReportType.X);
+                FR.PrintReport(KasaGE.Commands.ReportType.X);
 
             return GetCashRegisterData();
         }
@@ -327,7 +338,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             {
                 if (FR.isOpenFiscal==false)
                 {
-                    FR.openNonFiscal();
+                    FR.OpenNonFiscal();
                     text = text.Replace("<bell/>", "");
                     text = text.Replace("<f0/>", "");
                     text = text.Replace("<f1/>", "");
@@ -337,14 +348,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                     string[] mas = text.Split('\n');
                     foreach (var s in mas)
                     {
-                        FR.printTextNonFiscal(s);
+                        FR.PrintTextNonFiscal(s);
                     }
-                    FR.printNonFiscal();
+                    FR.PrintNonFiscal();
                    
                 }
                 else
                 {
-                    FR.addTask("nofiscal",text);
+                    FR.AddTask(text);
                 }
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})' printed text {2} (283)", DeviceName, deviceId, text);
             }
@@ -377,7 +388,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// </returns>
         public CashRegisterResult DoPayIn(decimal sum, IUser cashier, IViewManager viewManager)
         {
-            FR.openDrawler();
+            FR.OpenDrawler();
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. PayIn. (314)", DeviceName, deviceId);
             return GetCashRegisterData();
         }
@@ -392,7 +403,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// </returns>
         public CashRegisterResult DoPayOut(decimal sum, IUser cashier, IViewManager viewManager)
         {
-            FR.openDrawler();
+            FR.OpenDrawler();
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. PayOut. (328)", DeviceName, deviceId);
             return GetCashRegisterData();
         }
@@ -404,7 +415,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <param name="cashierTaxpayerId">ИНН кассира</param>
         public void OpenDrawer(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
         {
-            FR.openDrawler();
+            FR.OpenDrawler();
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Open drawer. (339)", DeviceName, deviceId);
         }
 
@@ -462,7 +473,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <summary>
         /// Используется для формирования счёта
         /// </summary>
-        /// <param name="billTask"> Аналогичен параметру <see cref="ChequeTask"/> в операции печати чека <see cref="DoCheque"/>,
+        /// <param name="billTask"> Аналогичен параметру 
+        /// <see cref="ChequeTask"/> в операции печати чека <see cref="DoCheque"/>,
         /// за исключением отсутствия оплат</param>
         /// <returns>Возвращает объект <see cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение

@@ -5,7 +5,6 @@ using System.Reflection;
 using Resto.Front.Api.Attributes.JetBrains;
 using Resto.Front.Api.Data.Device.Settings;
 using Resto.Front.Api.Devices;
-using System.Windows.Forms;
 
 namespace Resto.Front.Api.SampleCashRegisterPlugin
 {
