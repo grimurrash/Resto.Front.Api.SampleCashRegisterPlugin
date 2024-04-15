@@ -11,8 +11,9 @@ using Resto.Front.Api.UI;
 using Resto.Front.Api.Data.Security;
 using KasaGE.Commands;
 using System.Security.Cryptography;
-using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Text;
+using System.IO;
 
 namespace Resto.Front.Api.SampleCashRegisterPlugin
 {
@@ -61,11 +62,18 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// </summary>
         public void Start()
         {
+            
+            var settings = new SampleCashRegisterSettings(cashRegisterSettings);
+
+            if (!CheckActiveToDate(settings))
+            {
+                throw new Exception("Ключ продления лицензии недействителен!");
+            }
+
             try
             {
-                var settings = new SampleCashRegisterSettings(cashRegisterSettings);
                 FR = new FRgeorgia("COM"+settings.NumberSettingExample.Value.ToString());
-                //FR = new FRgeorgia("COM3");
+
                 state = State.Running;
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})' was started (68)", DeviceName, deviceId);
                
@@ -83,6 +91,13 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             {
                 var activeToDateTimestamp = DecryptString(settings.ActivateKey.Value.ToString(), settings.LicenseKey.Value.ToString());
                 var now = DateTime.Now;
+
+                return new DateTimeOffset(now).ToUnixTimeSeconds() < int.Parse(activeToDateTimestamp);
+            } catch (Exception ex) {
+                PluginContext.Log.WarnFormat("Device: '{0} ({1})' Error: {2} (73)", DeviceName, deviceId, ex.Message);
+                return false;
+            }
+        }
 
         private static string DecryptString(string cipherText, string key)
         {
@@ -240,13 +255,13 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                                 FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountByPercentage, sale.Discount ?? 0);
                             }
                             else if (sale.DiscountSum > 0 && sale.Discount == 0)
-                                {
+                            {
                                 FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountBySum, sale.DiscountSum ?? 0);
-                                }
+                            }
                             else if (sale.Increase > 0)
-                                {
+                            {
                                 FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeByPercentage, sale.Increase ?? 0);
-                                }
+                            }
                             else if (sale.IncreaseSum > 0 && sale.Increase == 0)
                             {
                                 FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeBySum, sale.IncreaseSum ?? 0);
@@ -255,8 +270,6 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                             {
                                 FR.AddItemFiscalNotDiscount(sale.Name, price, amount);
                             }
-
-                            FR.AddItemFiscalNotDiscount(sale.Name, price, amount);
                         }
                         PluginContext.Log.InfoFormat("End print sales");
                         FR.AddTextFiscal(chequeTask.TextBeforeCheque);
@@ -344,7 +357,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// </returns>
         public CashRegisterResult DoXReport(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
         {
-                PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (247)", DeviceName, deviceId);
+            PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (247)", DeviceName, deviceId);
             FR.PrintReport(ReportType.X);
 
             return GetCashRegisterData();

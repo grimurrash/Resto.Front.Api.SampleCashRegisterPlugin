@@ -25,6 +25,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// Числовой <seealso cref="DeviceNumberSetting"/>, текстовый <seealso cref="DeviceStringSetting"/>, 
         /// Флаг <seealso cref="DeviceBooleanSetting"/>, перечисление <seealso cref="DeviceCustomEnumSetting"/>
         public DeviceNumberSetting NumberSettingExample => GetSetting<DeviceNumberSetting>("NumberSettingExample");
+        public DeviceStringSetting LicenseKey => GetSetting<DeviceStringSetting>("LicenseKey");
+        public DeviceStringSetting ActivateKey => GetSetting<DeviceStringSetting>("ActivateKey");
 
         /// Для каждой настройки надо укажать стандартные значения и ограничения
         /// Для числовых настроек: <para />
@@ -34,7 +36,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// Максимальное значение - <seealso cref="DeviceNumberSetting.MaxValue"/>
         /// Минимальное значение - <seealso cref="DeviceNumberSetting.MinValue"/>
         /// Числовой тип - <seealso cref="DeviceNumberSetting.SettingKind"/>
-            public static readonly DeviceNumberSetting DefaultNumberSettingExample =
+        public static readonly DeviceNumberSetting DefaultNumberSettingExample =
             new DeviceNumberSetting
             {
                 Name = "NumberSettingExample",
@@ -45,6 +47,25 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 SettingKind = DeviceNumberSettingKind.Integer
             };
 
+         public static readonly DeviceStringSetting LicenseKeySetting =
+             new DeviceStringSetting
+             {
+                 Name = "LicenseKey",
+                 Label = "Лицензионный ключ",
+                 Value = "7sR9nA4LxPj8oTcWqF2uG5yZvE1wX3bK",
+                 MaxLength = 255,
+             };  
+        
+        public static readonly DeviceStringSetting ActivateKeySetting =
+             new DeviceStringSetting
+             {
+                 Name = "ActivateKey",
+                 Label = "Ключ продления лицензии",
+                 Value = "0FcEeZQAGJMmtYG0xTZ4Qg==",
+                 MaxLength = 255,
+             };
+
+
         //public DeviceStringSetting StringSettingExample => GetSetting<DeviceStringSetting>("StringSettingExample");
 
         /// Для строковых настроек: <para />
@@ -52,14 +73,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// Стандартное значение - <seealso cref="DeviceStringSetting.DefaultValue"/>
         /// Описание - <seealso cref="DeviceStringSetting.Label"/>
         /// Максимальная длина - <seealso cref="DeviceStringSetting.MaxLength"/>
-       /* public static readonly DeviceStringSetting DefaultStringSettingExample =
-            new DeviceStringSetting
-            {
-                Name = "StringSettingExample",
-                Label = "Введите COM порт (1,2,3...)",
-                Value = "1.0",
-                MaxLength = 255,
-            };*/
+        /* public static readonly DeviceStringSetting DefaultStringSettingExample =
+             new DeviceStringSetting
+             {
+                 Name = "StringSettingExample",
+                 Label = "Введите COM порт (1,2,3...)",
+                 Value = "1.0",
+                 MaxLength = 255,
+             };*/
 
         //public DeviceBooleanSetting BooleanSettingExample => GetSetting<DeviceBooleanSetting>("BooleanSettingExample");
 
@@ -67,15 +88,15 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// Обязательно имя - <seealso cref="DeviceBooleanSetting.Name"/>
         /// Стандартное значение - <seealso cref="DeviceBooleanSetting.DefaultValue"/>
         /// Описание - <seealso cref="DeviceBooleanSetting.Label"/>
-      /*  public static readonly DeviceBooleanSetting DefaultPrintItemsOnCheque =
-            new DeviceBooleanSetting
-            {
-                Name = "BooleanSettingExample",
-                Value = true,
-                Label = "Пример флаговой настройки",
-            };*/
+        /*  public static readonly DeviceBooleanSetting DefaultPrintItemsOnCheque =
+              new DeviceBooleanSetting
+              {
+                  Name = "BooleanSettingExample",
+                  Value = true,
+                  Label = "Пример флаговой настройки",
+              };*/
 
-       // public DeviceCustomEnumSetting ListSettingExample => GetSetting<DeviceCustomEnumSetting>("ListSettingExample");
+        // public DeviceCustomEnumSetting ListSettingExample => GetSetting<DeviceCustomEnumSetting>("ListSettingExample");
 
         /// Для перечислений: <para />
         /// Имя - <seealso cref="DeviceCustomEnumSetting.Name"/>

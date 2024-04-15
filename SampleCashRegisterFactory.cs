@@ -33,8 +33,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             return new CashRegisterSettings
             {
                 Code = CodeName,
-                Settings = new List<DeviceSetting>(
-                    typeof(SampleCashRegisterSettings).GetFields(BindingFlags.Static | BindingFlags.Public).Select(info => (DeviceSetting)info.GetValue(null))),
+                Settings = new List<DeviceSetting>(typeof(SampleCashRegisterSettings).GetFields(BindingFlags.Static | BindingFlags.Public).Select(info => (DeviceSetting)info.GetValue(null))),
                 Font0Width = new DeviceNumberSetting
                 {
                     Name = "Font0Width",
