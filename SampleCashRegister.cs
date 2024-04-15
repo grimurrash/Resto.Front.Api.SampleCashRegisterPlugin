@@ -77,6 +77,34 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
            
         }
 
+        private bool CheckActiveToDate(SampleCashRegisterSettings settings)
+        {
+            try
+            {
+                var activeToDateTimestamp = DecryptString(settings.ActivateKey.Value.ToString(), settings.LicenseKey.Value.ToString());
+                var now = DateTime.Now;
+
+        private static string DecryptString(string cipherText, string key)
+        {
+            byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = Encoding.UTF8.GetBytes(key);
+                aesAlg.IV = Encoding.UTF8.GetBytes("8fd03a2daf65652a");
+
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+                using (MemoryStream msDecrypt = new MemoryStream(cipherTextBytes))
+                {
+                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                        {
+                            return srDecrypt.ReadToEnd();
+                        }
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Команда выполняет остановку устройства, освобождение ресурсов, закрытие портов
@@ -165,58 +193,67 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
                     if (card == false)
                     {
-                        PluginContext.Log.InfoFormat("Sales {0}", JsonConvert.SerializeObject(chequeTask));
-                        bool isRound = true;
-                        if (chequeTask.RoundSum != null && chequeTask.RoundSum > 0)
+                        PluginContext.Log.InfoFormat("ChequeTask {0}", JsonConvert.SerializeObject(chequeTask));
+                        bool isRound = false;
+                        if (chequeTask.RoundSum != null && chequeTask.RoundSum != 0)
                         {
-                            isRound = false;
+                            isRound = true;
                         }
 
                         FR.OpenFiscal("007", "7", recT);
                         FR.AddTextFiscal(chequeTask.TextAfterCheque);
                         PluginContext.Log.InfoFormat("Start print sales");
-                        foreach (ChequeSale sale in chequeTask.Sales) {
-                            PluginContext.Log.InfoFormat("Sales {0}", JsonConvert.SerializeObject(sale)); 
-                            decimal price = sale.Sum ?? 0;
+                        foreach (ChequeSale sale in chequeTask.Sales.OrderBy(s => s.Discount))
+                        {
+                            //decimal price = sale.Sum ?? 0;
+                            decimal price = sale.Price ?? 0;
                             decimal amount = sale.Amount ?? 1;
+                            decimal discountPercent = sale.Discount ?? 0;
                             decimal discountSum = sale.DiscountSum ?? 0;
+                            decimal increasetPercent = sale.Increase ?? 0;
                             decimal increaseSum = sale.IncreaseSum ?? 0;
-                            if (price > 0 && amount > 0)
+
+                            if (price == 0 && discountPercent == 0 && discountSum == 0)
                             {
-                                price /= amount;
+                                continue;
                             }
 
-                            /*if (chequeTask.Sales.ElementAt(i).DiscountSum != null && chequeTask.Sales.ElementAt(i).DiscountSum != 0)
+                            if (price > 0)
                             {
-                                if (chequeTask.Sales.ElementAt(i).Amount != null)
+                                //if (amount > 0)
+                                //{
+                                //    price /= amount;
+                                //}
+
+                                if (isRound)
                                 {
-                                    price -= (decimal)chequeTask.Sales.ElementAt(i).DiscountSum / (decimal)chequeTask.Sales.ElementAt(i).Amount;
+                                    price = Math.Round(price);
                                 }
                                 else
                                 {
-                                    price -= (decimal)chequeTask.Sales.ElementAt(i).DiscountSum;
+                                    price = Math.Round(price, 2);
                                 }
                             }
 
-                            if (chequeTask.Sales.ElementAt(i).IncreaseSum != null && chequeTask.Sales.ElementAt(i).IncreaseSum != 0)
+                            if (sale.Discount > 0)
                             {
-                                if (chequeTask.Sales.ElementAt(i).Amount != null)
+                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountByPercentage, sale.Discount ?? 0);
+                            }
+                            else if (sale.DiscountSum > 0 && sale.Discount == 0)
                                 {
-                                    price += (decimal)chequeTask.Sales.ElementAt(i).IncreaseSum / (decimal)chequeTask.Sales.ElementAt(i).Amount;
+                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountBySum, sale.DiscountSum ?? 0);
                                 }
-                                else
+                            else if (sale.Increase > 0)
                                 {
-                                    price += (decimal)chequeTask.Sales.ElementAt(i).IncreaseSum;
+                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeByPercentage, sale.Increase ?? 0);
                                 }
-                            }*/
-
-                            if (isRound)
+                            else if (sale.IncreaseSum > 0 && sale.Increase == 0)
                             {
-                                price = Math.Round(price);
+                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeBySum, sale.IncreaseSum ?? 0);
                             }
                             else
                             {
-                                price = Math.Round(price, 2);
+                                FR.AddItemFiscalNotDiscount(sale.Name, price, amount);
                             }
 
                             FR.AddItemFiscalNotDiscount(sale.Name, price, amount);
@@ -233,15 +270,10 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed. (176)", DeviceName, deviceId);
                 return GetCashRegisterData();
             }
-            catch(NullReferenceException ex)
-            {
-                PluginContext.Log.WarnFormat("Device: '{0} ({1})': {2} (287) details {3}", DeviceName, deviceId, ex.Message, ex.InnerException.Message);
-                return GetCashRegisterData();
-            }
             catch (Exception ex)
             {
-                PluginContext.Log.WarnFormat("Device: '{0} ({1})': {2} (287) details {3}", DeviceName, deviceId, ex.Message, ex.InnerException.Message);
-                return GetCashRegisterData();
+                PluginContext.Log.WarnFormat("Device: '{0} ({1})' Exception: {2} file = {3} line = {4} (286) details {5}", DeviceName, deviceId, ex.Message, ex.Source, ex.TargetSite, ex.StackTrace);
+                throw new Exception($"Print error: {ex.Message}");
             }
         }
 
@@ -313,7 +345,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public CashRegisterResult DoXReport(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
         {
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (247)", DeviceName, deviceId);
-                FR.PrintReport(KasaGE.Commands.ReportType.X);
+            FR.PrintReport(ReportType.X);
 
             return GetCashRegisterData();
         }
@@ -361,8 +393,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
             catch (Exception ex)
             {
-                PluginContext.Log.WarnFormat("Device: '{0} ({1})': {2} (287) details {3}", DeviceName, deviceId, ex.Message,ex.InnerException.Message);
-                throw new Exception(ex.Message);
+                PluginContext.Log.WarnFormat("Device: '{0} ({1})' Exception: {2} file = {3} line = {4} (287) details {5}", DeviceName, deviceId, ex.Message, ex.Source, ex.TargetSite, ex.StackTrace);
+                throw new Exception($"Print error: {ex.Message}");
             }
             
             

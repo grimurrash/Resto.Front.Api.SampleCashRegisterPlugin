@@ -88,12 +88,12 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         }
         private void ExMessage(string errorFunction = "")
         {
-            if (string.IsNullOrEmpty(lastError))
+            if (string.IsNullOrWhiteSpace(lastError))
             {
                 return;
             }
 
-            PluginContext.Log.ErrorFormat("ERROR {2}: {3}", errorFunction, lastError);
+            PluginContext.Log.ErrorFormat("ERROR {0}: {1}", errorFunction, lastError);
             lastError = "";
 
             if (lastError == "-111015")
@@ -104,10 +104,21 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
         public void AddTextFiscal(string text)
         {
+            if (string.IsNullOrEmpty(text)) {  
+                return; 
+            }
+
             if (isOpenFiscal == true)
             {
-                PluginContext.Log.InfoFormat("Start AddTextFiscal: text={0}", text); 
-                lastError =  ecr.AddTextToFiscalReceipt(text).ErrorCode;
+                PluginContext.Log.InfoFormat("Start AddTextFiscal: text=\"{0}\"", text); 
+                text = text.Replace("\r", "");
+                
+                foreach (var s in text.Split('\n'))
+                {
+                    PluginContext.Log.InfoFormat("AddTextFiscal: s=\"{0}\"", s);
+                    lastError = ecr.AddTextToFiscalReceipt(s).ErrorCode;
+                }
+                
                 ExMessage("AddTextToFiscalReceipt");
             }
         }
@@ -177,61 +188,67 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                         if (card == false)
                         {
                             PluginContext.Log.InfoFormat("Sales {0}", JsonConvert.SerializeObject(chequeTask));
-                            bool isRound = true;
-                            if (chequeTask.RoundSum != null && chequeTask.RoundSum > 0)
+                            bool isRound = false;
+                            if (chequeTask.RoundSum != null && chequeTask.RoundSum != 0)
                             {
-                                isRound = false;
+                                isRound = true;
                             }
 
                             OpenFiscal("007", "7", recT);
                             AddTextFiscal(chequeTask.TextAfterCheque);
                             PluginContext.Log.InfoFormat("Start print sales");
-                            foreach (ChequeSale sale in chequeTask.Sales)
+                            foreach (ChequeSale sale in chequeTask.Sales.OrderBy(s => s.Discount))
                             {
-                                PluginContext.Log.InfoFormat("Sales {0}", JsonConvert.SerializeObject(sale));
-                                decimal price = sale.Sum ?? 0;
+                                //decimal price = sale.Sum ?? 0;
+                                decimal price = sale.Price ?? 0;
                                 decimal amount = sale.Amount ?? 1;
+                                decimal discountPercent = sale.Discount ?? 0;
                                 decimal discountSum = sale.DiscountSum ?? 0;
+                                decimal increasetPercent = sale.Increase ?? 0;
                                 decimal increaseSum = sale.IncreaseSum ?? 0;
-                                if (price > 0 && amount > 0)
+
+                                if (price == 0 && discountPercent == 0 && discountSum == 0)
                                 {
-                                    price /= amount;
+                                    continue;
                                 }
 
-                                /*if (chequeTask.Sales.ElementAt(i).DiscountSum != null && chequeTask.Sales.ElementAt(i).DiscountSum != 0)
+                                if (price > 0)
                                 {
-                                    if (chequeTask.Sales.ElementAt(i).Amount != null)
+                                    //if (amount > 0)
+                                    //{
+                                    //    price /= amount;
+                                    //}
+
+                                    if (isRound)
                                     {
-                                        price -= (decimal)chequeTask.Sales.ElementAt(i).DiscountSum / (decimal)chequeTask.Sales.ElementAt(i).Amount;
+                                        price = Math.Round(price);
                                     }
                                     else
                                     {
-                                        price -= (decimal)chequeTask.Sales.ElementAt(i).DiscountSum;
+                                        price = Math.Round(price, 2);
                                     }
                                 }
 
-                                if (chequeTask.Sales.ElementAt(i).IncreaseSum != null && chequeTask.Sales.ElementAt(i).IncreaseSum != 0)
+                                if (sale.Discount > 0)
                                 {
-                                    if (chequeTask.Sales.ElementAt(i).Amount != null)
-                                    {
-                                        price += (decimal)chequeTask.Sales.ElementAt(i).IncreaseSum / (decimal)chequeTask.Sales.ElementAt(i).Amount;
-                                    }
-                                    else
-                                    {
-                                        price += (decimal)chequeTask.Sales.ElementAt(i).IncreaseSum;
-                                    }
-                                }*/
-
-                                if (isRound)
+                                    AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountByPercentage, sale.Discount ?? 0);
+                                }
+                                else if (sale.DiscountSum > 0 && sale.Discount == 0)
                                 {
-                                    price = Math.Round(price);
+                                    AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountBySum, sale.DiscountSum ?? 0);
+                                }
+                                else if (sale.Increase > 0)
+                                {
+                                    AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeByPercentage, sale.Increase ?? 0);
+                                }
+                                else if (sale.IncreaseSum > 0 && sale.Increase == 0)
+                                {
+                                    AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeBySum, sale.IncreaseSum ?? 0);
                                 }
                                 else
                                 {
-                                    price = Math.Round(price, 2);
+                                    AddItemFiscalNotDiscount(sale.Name, price, amount);
                                 }
-
-                                AddItemFiscalNotDiscount(sale.Name, price, amount);
                             }
                             PluginContext.Log.InfoFormat("End print sales");
                             AddTextFiscal(chequeTask.TextBeforeCheque);
@@ -293,7 +310,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             if (isOpenFiscal || isOpenNonFiscal)
             {
-                PluginContext.Log.InfoFormat("AddItemFiscalNotDiscount: nameItem={0} | price={1} | amount={2}", nameItem, price, amount);
+                PluginContext.Log.InfoFormat("AddItemFiscalWithDiscount: nameItem={0} | price={1} | amount={2} | discountType={3} discount={4}", nameItem, price, amount, discountType, discountValue);
                 lastError = ecr.RegisterSale(nameItem, price, amount, 1, discountType, discountValue).ErrorCode;
                 ExMessage("RegisterSale");
             }
@@ -303,7 +320,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             if (isOpenNonFiscal)
             {
-                PluginContext.Log.InfoFormat("AddItemFiscal:  text={0}", text);
+                PluginContext.Log.InfoFormat("PrintTextNonFiscal:  text={0}", text);
                 lastError = ecr.AddTextToNonFiscalReceipt(text).ErrorCode;
                 ExMessage("AddTextToNonFiscalReceipt");
             }
