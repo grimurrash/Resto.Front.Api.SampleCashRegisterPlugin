@@ -61,7 +61,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
              {
                  Name = "ActivateKey",
                  Label = "Ключ продления лицензии",
-                 Value = "0FcEeZQAGJMmtYG0xTZ4Qg==",
+                 Value = "pLfAMtzGkiLRyx3UP5ixeQ==",
                  MaxLength = 255,
              };
 

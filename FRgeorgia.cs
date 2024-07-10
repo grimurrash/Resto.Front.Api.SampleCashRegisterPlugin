@@ -112,11 +112,17 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             {
                 PluginContext.Log.InfoFormat("Start AddTextFiscal: text=\"{0}\"", text); 
                 text = text.Replace("\r", "");
-                
+                text = text.Replace("<bell/>", "");
+                text = text.Replace("<f0/>", "");
+                text = text.Replace("<f1/>", "");
+                text = text.Replace("<f2/>", "");
+                text = text.Replace("<papercut/>", "");
+
                 foreach (var s in text.Split('\n'))
                 {
-                    PluginContext.Log.InfoFormat("AddTextFiscal: s=\"{0}\"", s);
-                    lastError = ecr.AddTextToFiscalReceipt(s).ErrorCode;
+                    var trimText = s.TrimEnd();
+                    PluginContext.Log.InfoFormat("AddTextFiscal: s=\"{0}\"", trimText);
+                    lastError = ecr.AddTextToFiscalReceipt(trimText).ErrorCode;
                 }
                 
                 ExMessage("AddTextToFiscalReceipt");
@@ -269,6 +275,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                     {
                         string text = Task.text;
                         this.OpenNonFiscal();
+                        text = text.Replace("\r", "");
                         text = text.Replace("<bell/>", "");
                         text = text.Replace("<f0/>", "");
                         text = text.Replace("<f1/>", "");

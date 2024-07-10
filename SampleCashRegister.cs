@@ -65,10 +65,13 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             
             var settings = new SampleCashRegisterSettings(cashRegisterSettings);
 
+            PluginContext.Log.InfoFormat("Device: '{0} ({1})' start check activate to date (63)", DeviceName, deviceId);
             if (!CheckActiveToDate(settings))
             {
                 throw new Exception("Ключ продления лицензии недействителен!");
             }
+
+            PluginContext.Log.InfoFormat("Device: '{0} ({1})' successful check activate to date(64)", DeviceName, deviceId);
 
             try
             {
