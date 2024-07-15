@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using KasaGE;
 using KasaGE.Commands;
 using Newtonsoft.Json;
@@ -52,7 +53,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
         public void OpenDrawler()
         {
-            PluginContext.Log.InfoFormat("Start openNonFiscal");
+            PluginContext.Log.InfoFormat("Start openDrawler");
             lastError = ecr.OpenDrawer(10).ErrorCode;
             ExMessage("OpenDrawer");
         }
@@ -110,13 +111,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
             if (isOpenFiscal == true)
             {
-                PluginContext.Log.InfoFormat("Start AddTextFiscal: text=\"{0}\"", text); 
+                PluginContext.Log.InfoFormat("Start AddTextFiscal: text=\"{0}\"", text);
                 text = text.Replace("\r", "");
-                text = text.Replace("<bell/>", "");
-                text = text.Replace("<f0/>", "");
-                text = text.Replace("<f1/>", "");
-                text = text.Replace("<f2/>", "");
-                text = text.Replace("<papercut/>", "");
+                text = text.Replace("<bell />", "");
+                text = text.Replace("<f0 />", "");
+                text = text.Replace("<f1 />", "");
+                text = text.Replace("<f2 />", "");
+                text = text.Replace("<papercut />", "");
+                text = text.Replace("<pagecut />", "");
 
                 foreach (var s in text.Split('\n'))
                 {
@@ -157,26 +159,22 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
             PluginContext.Log.InfoFormat("Start ExecuteTask");
             execute = true;
-            PrintTasks Task;
 
-            for (int j = 0; j < tasks.Count; j++)
+            var sTasks = new List<PrintTasks>(tasks);
+            tasks.Clear();
+            PluginContext.Log.InfoFormat("Task count {0}", sTasks.Count);
+
+            foreach (var Task in sTasks)
             {
-                try
-                {
-                    Task = tasks.ElementAt(j);
-                    if (Task == null)
-                    {
-                        return;
-                    }
-                }
-                catch (Exception)
-                {
-                    return;
-                }
-
                 if (Task.type == "fiscal")
                 {
-                    try
+                   if (isOpenFiscal == true)
+                   {
+                        this.AddTask(Task.ChequeTask);
+                        continue;
+                   }
+
+                   try
                     {
                         ChequeTask chequeTask = Task.ChequeTask;
                         bool card = false;
@@ -271,16 +269,23 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 }
                 else
                 {
+                    if (isOpenNonFiscal == true)
+                    {
+                        AddTask(Task.text);
+                        continue;
+                    }
+
                     try
                     {
                         string text = Task.text;
                         this.OpenNonFiscal();
                         text = text.Replace("\r", "");
-                        text = text.Replace("<bell/>", "");
-                        text = text.Replace("<f0/>", "");
-                        text = text.Replace("<f1/>", "");
-                        text = text.Replace("<f2/>", "");
-                        text = text.Replace("<papercut/>", "");
+                        text = text.Replace("<bell />", "");
+                        text = text.Replace("<f0 />", "");
+                        text = text.Replace("<f1 />", "");
+                        text = text.Replace("<f2 />", "");
+                        text = text.Replace("<papercut />", "");
+                        text = text.Replace("<pagecut />", "");
                         string[] mas = text.Split('\n');
                         foreach (var s in mas)
                         {
@@ -298,8 +303,13 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                     }
                 }
             }
-            tasks.Clear();
+            sTasks.Clear();
             execute = false;
+
+            if (tasks.Count > 0)
+            {
+                ExecuteTask();
+            }
             return;
         }
 

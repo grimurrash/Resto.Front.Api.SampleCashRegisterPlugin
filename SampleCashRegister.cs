@@ -182,7 +182,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             try
             {
-                if (FR.isOpenNonFiscal==false)
+                if (FR.isOpenFiscal==false)
                 {
                     #region Пример чтения настроек
                     var settings = new SampleCashRegisterSettings(cashRegisterSettings);
@@ -384,15 +384,17 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             try
             {
-                if (FR.isOpenFiscal==false)
+                PluginContext.Log.InfoFormat("PrintText {0}", text);
+                if (FR.isOpenNonFiscal==false)
                 {
                     FR.OpenNonFiscal();
-                    text = text.Replace("<bell/>", "");
-                    text = text.Replace("<f0/>", "");
-                    text = text.Replace("<f1/>", "");
-                    text = text.Replace("<f2/>", "");
-                    text = text.Replace("<papercut/>", "");
-                    text = text.Replace("<pagecut/>", "");
+                    text = text.Replace("\r", "");
+                    text = text.Replace("<bell />", "");
+                    text = text.Replace("<f0 />", "");
+                    text = text.Replace("<f1 />", "");
+                    text = text.Replace("<f2 />", "");
+                    text = text.Replace("<papercut />", "");
+                    text = text.Replace("<pagecut />", "");
                     string[] mas = text.Split('\n');
                     foreach (var s in mas)
                     {
