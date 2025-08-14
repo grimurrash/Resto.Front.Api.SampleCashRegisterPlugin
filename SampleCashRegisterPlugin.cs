@@ -39,11 +39,11 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
             catch (PaymentSystemRegistrationException ex)
             {
-                PluginContext.Log.WarnFormat("Sample cash register factory: '{0}' wasn't registered. Reason: {1}", cashRegisterFactory.CodeName, ex.Message);
+                PluginContext.Log.WarnFormat("Sample cash register factory: '{0}' wasn't registered. Reason: {1}", cashRegisterFactory.Description, ex.Message);
                 PluginContext.Shutdown();
                 return;
             }
-            PluginContext.Log.InfoFormat("Sample cash register factory: '{0}' was successfully registered on server.", cashRegisterFactory.CodeName);
+            PluginContext.Log.InfoFormat("Sample cash register factory: '{0}' was successfully registered on server.", cashRegisterFactory.Description);
             
         }
     }

@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using Newtonsoft.Json;
 using System.Text;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Resto.Front.Api.SampleCashRegisterPlugin
 {
@@ -90,6 +91,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
         private bool CheckActiveToDate(SampleCashRegisterSettings settings)
         {
+            return true;
+
             try
             {
                 var activeToDateTimestamp = DecryptString(settings.ActivateKey.Value.ToString(), settings.LicenseKey.Value.ToString());
@@ -161,24 +164,22 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <summary>
         /// Операция печати чека включает в себя открытие фискального чека, 
         /// Добавление предметов расчёта, дополнительные реквизиты, округление копеек или скидки, закрытие чека.
-        /// Для чека возврата поле <paramref name="chequeTask.Storno"/> имеет значение true 
+        /// Для чека возврата поле <paramref name="chequeTask.IsRefund"/> имеет значение true 
         /// </summary>
         /// Объект <see cref="ChequeTask" />, который содерджит следующие данные: <para />
         /// <see cref="ChequeTask.TextAfterCheque"/> Текст, который должен быть напечатан до тела чека, может быть пустым<para />
         /// <see cref="ChequeTask.TableNumber"/> Номер стола заказа<para />
         /// <see cref="ChequeTask.TextBeforeCheque"/> Текст, который должен быть распечатан после тела чека, может быть пустым<para />
         /// <see cref="ChequeTask.Sales"/> Список предметов расчёта<para />
-        /// <see cref="ChequeTask.RoundSum"/> Сумма округления копеек, скидка содержится в поле 
-        /// <see cref="ChequeTask.DiscountSum"/>, <para />
-        /// <see cref="ChequeTask.OfdEmail"/> Адрес электронной почты покупателя, на который будет отправлен электронный чек, имеет более высокий приоритет, чем 
-        /// <see cref="ChequeTask.OfdPhoneNumber"/> ,<para />
+        /// <see cref="ChequeTask.RoundSum"/> Сумма округления копеек, скидка содержится в поле <see cref="ChequeTask.DiscountSum"/>, <para />
+        /// <see cref="ChequeTask.OfdEmail"/> Адрес электронной почты покупателя, на который будет отправлен электронный чек, имеет более высокий приоритет, чем <see cref="ChequeTask.OfdPhoneNumber"/> ,<para />
         /// <see cref="ChequeTask.OfdPhoneNumber"/> Номер телефона покупателя, на который будет отправлен электронный чек<para />
         /// <see cref="ChequeTask.CashPayment"/> Сумма оплаты наличными<para />
         /// <see cref="ChequeTask.CardPayments"/> Список оплат, кроме наличных, список типов оплат должен быть синхронизированы с идентификаторами оплат на ФР посредством настроек в BackOffice<para />
         /// <returns>Возвращает объект <see cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение.
         /// </returns>
-        public CashRegisterResult DoCheque(ChequeTask chequeTask, IViewManager viewManager)
+        public CashRegisterResult DoCheque(ChequeTask chequeTask, IViewManager viewManager, IOperationDataContext operationDataContext)
         {
             try
             {
@@ -284,7 +285,11 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                     FR.AddTask(chequeTask);
                 }
                 PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed. (176)", DeviceName, deviceId);
-                return GetCashRegisterData();
+                
+                var result = GetCashRegisterData();
+                
+                return result;
+
             }
             catch (Exception ex)
             {
@@ -321,7 +326,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// </returns>
         public CashRegisterResult GetCashRegisterData()
         {
-            return new CashRegisterResult(null, null, null, "", null, null, null, "");
+            return new CashRegisterResult(null, null, null, "", null, null, null, "", "", "", null);
         }
 
         /// <summary>
@@ -333,7 +338,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <returns>Возвращает объект <see cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение
         /// </returns>
-        public CashRegisterResult DoZReport(string cashierName, string cashierTaxpayerId, bool printEklzReport, IViewManager viewManager)
+        public CashRegisterResult DoZReport([NotNull] ICafeSession cafeSession, [NotNull] ZReportTask task, [CanBeNull] IUser cashier, [NotNull] IViewManager viewManager)
         {
             FR.PrintReport(ReportType.Z);
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (223)", DeviceName, deviceId);
@@ -346,7 +351,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <param name="statusFields">Список запрашиваемых полей</param>
         /// <returns>Возвращает экземпляры <see cref="CashRegisterStatus"/>, с заполненными запрошенными полями, либо null, если значение не заполнено.
         /// </returns>
-        public CashRegisterStatus GetCashRegisterStatus(IReadOnlyCollection<CashRegisterStatusField> statusFields)
+        public CashRegisterStatus GetCashRegisterStatus([NotNull] GetCashRegisterStatusTask task)
         { 
             return new CashRegisterStatus();
         }
@@ -358,13 +363,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <returns>Возвращает объект <seealso cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение
         /// </returns>
-        public CashRegisterResult DoXReport(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
+        public CashRegisterResult DoXReport([NotNull] XReportTask task, [CanBeNull] IUser cashier, [NotNull] IViewManager viewManager)
         {
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Z-report printed. (247)", DeviceName, deviceId);
             FR.PrintReport(ReportType.X);
 
             return GetCashRegisterData();
         }
+
         /// <summary>
         /// Печать текстового (нефискального) чека, информационного, рекламного, пречек и т.д.
         /// Могут присутствовать следующие теги:<para />
@@ -377,55 +383,50 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <![CDATA[<logo data="..."/>]]> - логотип<para />
         /// <![CDATA[<qrcode size="..." correction="...">...text...</qrcode>]]> - QR-код<para />
         /// </summary>
-        /// <param name="text">Текст для печати, строки разделены символом LF (\\n)</param>
-        /// <param name="cashierId"></param>
-        /// <param name="cashierName"></param>
-        public void PrintText(string text)
+        /// <param name="printTextTask.Document">Документ для печати (\\n)</param>
+        public CashRegisterResult PrintText([NotNull] PrintTextTask task, [CanBeNull] IUser cashier)
         {
             try
             {
-                PluginContext.Log.InfoFormat("PrintText {0}", text);
+                PluginContext.Log.InfoFormat("PrintText {0}", task.Document.Markup.ToString());
+
+
                 if (FR.isOpenNonFiscal==false)
                 {
                     FR.OpenNonFiscal();
-                    text = text.Replace("\r", "");
-                    text = text.Replace("<bell />", "");
-                    text = text.Replace("<f0 />", "");
-                    text = text.Replace("<f1 />", "");
-                    text = text.Replace("<f2 />", "");
-                    text = text.Replace("<papercut />", "");
-                    text = text.Replace("<pagecut />", "");
-                    string[] mas = text.Split('\n');
-                    foreach (var s in mas)
+                    string text = FR.ConvertDocumentToString(task.Document);
+                    
+                    foreach (var s in FR.ConvertDocumentStringToArray(text))
                     {
                         FR.PrintTextNonFiscal(s);
                     }
+
                     FR.PrintNonFiscal();
-                   
                 }
                 else
                 {
-                    FR.AddTask(text);
+                    FR.AddTask(task.Document);
                 }
-                PluginContext.Log.InfoFormat("Device: '{0} ({1})' printed text {2} (283)", DeviceName, deviceId, text);
+                PluginContext.Log.InfoFormat("Device: '{0} ({1})' printed text {2} (283)", DeviceName, deviceId, task.Document.Markup.ToString());
             }
             catch (Exception ex)
             {
                 PluginContext.Log.WarnFormat("Device: '{0} ({1})' Exception: {2} file = {3} line = {4} (287) details {5}", DeviceName, deviceId, ex.Message, ex.Source, ex.TargetSite, ex.StackTrace);
                 throw new Exception($"Print error: {ex.Message}");
             }
-            
-            
+
+            return GetCashRegisterData();
         }
-        
+
         /// <summary>
         /// Операция начала смены
         /// </summary>
         /// <param name="cashierName">Имя кассира</param>
         /// <param name="cashierTaxpayerId">ИНН кассира</param>
-        public void DoOpenSession(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
+        public CashRegisterResult DoOpenSession([NotNull] OpenSessionTask task, [CanBeNull] IUser cashier, [NotNull] IViewManager viewManager)
         {
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Session opened. (301)", DeviceName, deviceId);
+            return GetCashRegisterData();
         }
 
         /// <summary>
@@ -436,7 +437,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <returns>Возвращает объект <see cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение
         /// </returns>
-        public CashRegisterResult DoPayIn(decimal sum, IUser cashier, IViewManager viewManager)
+        public CashRegisterResult DoPayIn([NotNull] PayInTask task, [CanBeNull] IUser cashier, [NotNull] IViewManager viewManager)
         {
             FR.OpenDrawler();
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. PayIn. (314)", DeviceName, deviceId);
@@ -451,19 +452,19 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <returns>Возвращает объект <see cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение
         /// </returns>
-        public CashRegisterResult DoPayOut(decimal sum, IUser cashier, IViewManager viewManager)
+        public CashRegisterResult DoPayOut([NotNull] PayOutTask task, [CanBeNull] IUser cashier, [NotNull] IViewManager viewManager)
         {
             FR.OpenDrawler();
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. PayOut. (328)", DeviceName, deviceId);
             return GetCashRegisterData();
         }
-        
+
         /// <summary>
         /// Открыть денежный ящик, подключенный к фискальному регистратору
         /// </summary>
         /// <param name="cashierName">Имя кассира</param>
         /// <param name="cashierTaxpayerId">ИНН кассира</param>
-        public void OpenDrawer(string cashierName, string cashierTaxpayerId, IViewManager viewManager)
+        public void OpenDrawer([CanBeNull] IUser cashier, [NotNull] IViewManager viewManager)
         {
             FR.OpenDrawler();
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Open drawer. (339)", DeviceName, deviceId);
@@ -513,7 +514,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// со списком строк <see cref="Document.Lines"/>, содержащими текст результата<para />
         /// При ошибке выкидывать исключение
         /// </returns>
-        public DirectIoResult DirectIo(CommandExecute execute)
+        public DirectIoResult DirectIo([NotNull] DirectIoTask task, [CanBeNull] IUser cashier)
         {
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. DirectIo.", DeviceName, deviceId);
 
@@ -536,10 +537,6 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             return GetCashRegisterData();
         }
 
-        public void DoCorrection(CorrectionTask task, IViewManager viewManager)
-        {
-            PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Correction. (409)", DeviceName, deviceId);
-        }
 
         /// <summary>
         /// Переводит дисплей покупателя в режим ожидания, если он присутствует

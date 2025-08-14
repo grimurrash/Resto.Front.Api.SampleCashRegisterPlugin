@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using KasaGE;
 using KasaGE.Commands;
 using Newtonsoft.Json;
 using Resto.Front.Api.Data.Device.Tasks;
+using Resto.Front.Api.Data.Print;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Resto.Front.Api.SampleCashRegisterPlugin
 {
@@ -103,26 +106,66 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
         }
 
-        public void AddTextFiscal(string text)
+        public List<string> ConvertDocumentStringToArray(string documentString)
         {
+            List<string> resultList = new List<string>();
+            var unwantedPrefix = "  <";
+            foreach (var s in documentString.Split('\n'))
+            {
+                var trimText = s.TrimEnd();
+
+                if (trimText.StartsWith(unwantedPrefix))
+                {
+                    trimText = trimText.Substring(unwantedPrefix.Length);
+                }
+                resultList.Add(trimText);
+            }
+
+            return resultList;
+        }
+        
+        public string ConvertDocumentToString(Data.Print.Document document)
+        {
+            string text = document.Markup.ToString();
+
+            text = text.Replace("\r", "");
+            text = text.Replace("<doc>", "");
+            text = text.Replace("</doc>", "");
+            text = text.Replace("<doc />", "");
+            text = text.Replace("<bell />", "");
+            //text = text.Replace("  <f0>", "<f0>");
+            //text = text.Replace("  <f1>", "<f1>");
+            //text = text.Replace("  <f2>", "<f2>");
+            //text = text.Replace("<f0>", "");
+            //text = text.Replace("<f1>", "");
+            //text = text.Replace("<f2>", "");
+            //text = text.Replace("</f0>", "");
+            //text = text.Replace("</f1>", "");
+            //text = text.Replace("</f2>", "");
+            text = text.Replace("<f0 />", "");
+            text = text.Replace("<f1 />", "");
+            text = text.Replace("<f2 />", "");
+            text = text.Replace("<papercut />", "");
+            text = text.Replace("<pagecut />", "");
+
+            return text;
+        }
+
+        public void AddTextFiscal(Document document)
+        {
+            string text = ConvertDocumentToString(document);
+
             if (string.IsNullOrEmpty(text)) {  
                 return; 
             }
 
             if (isOpenFiscal == true)
             {
-                PluginContext.Log.InfoFormat("Start AddTextFiscal: text=\"{0}\"", text);
-                text = text.Replace("\r", "");
-                text = text.Replace("<bell />", "");
-                text = text.Replace("<f0 />", "");
-                text = text.Replace("<f1 />", "");
-                text = text.Replace("<f2 />", "");
-                text = text.Replace("<papercut />", "");
-                text = text.Replace("<pagecut />", "");
+                PluginContext.Log.InfoFormat("Start AddTextFiscal: text=\"{0}\"", document.Markup.ToString());
 
-                foreach (var s in text.Split('\n'))
+
+                foreach (var trimText in ConvertDocumentStringToArray(text))
                 {
-                    var trimText = s.TrimEnd();
                     PluginContext.Log.InfoFormat("AddTextFiscal: s=\"{0}\"", trimText);
                     lastError = ecr.AddTextToFiscalReceipt(trimText).ErrorCode;
                 }
@@ -144,10 +187,10 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             tasks.Add(task);
         }
 
-        public void AddTask(string text)
+        public void AddTask(Document document)
         {
             PluginContext.Log.InfoFormat("Add nofiscal Task");
-            PrintTasks task = new PrintTasks("nofiscal", text);
+            PrintTasks task = new PrintTasks("nofiscal", document);
             tasks.Add(task);
         }
 
@@ -268,26 +311,19 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
                 }
                 else
-                {
+                { 
                     if (isOpenNonFiscal == true)
                     {
-                        AddTask(Task.text);
+                        AddTask(Task.document);
                         continue;
                     }
 
                     try
                     {
-                        string text = Task.text;
+                        string text = ConvertDocumentToString(Task.document);
                         this.OpenNonFiscal();
-                        text = text.Replace("\r", "");
-                        text = text.Replace("<bell />", "");
-                        text = text.Replace("<f0 />", "");
-                        text = text.Replace("<f1 />", "");
-                        text = text.Replace("<f2 />", "");
-                        text = text.Replace("<papercut />", "");
-                        text = text.Replace("<pagecut />", "");
-                        string[] mas = text.Split('\n');
-                        foreach (var s in mas)
+                       
+                        foreach (var s in ConvertDocumentStringToArray(text))
                         {
                             this.PrintTextNonFiscal(s);
                         }

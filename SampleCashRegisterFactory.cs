@@ -14,6 +14,9 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public override object InitializeLifetimeService() { return null; }
 
         [NotNull]
+        private const string PluginFactoryCode = "{A890294B-D333-4980-ACA7-3D7321C7FDD8}";
+
+        [NotNull]
         private const string CashRegisterName = "FP700(plugin)";
 
         public SampleCashRegisterFactory()
@@ -21,8 +24,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             DefaultDeviceSettings = InitDefaultDeviceSettings();
         }
 
-        [NotNull]
-        public string CodeName => CashRegisterName;
+        public string FactoryCode => PluginFactoryCode;
+        public string Description => CashRegisterName;
 
         [NotNull]
         public DeviceSettings DefaultDeviceSettings { get; }
@@ -32,7 +35,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             return new CashRegisterSettings
             {
-                Code = CodeName,
+                FactoryCode = FactoryCode,
+                Description = Description,
                 Settings = new List<DeviceSetting>(typeof(SampleCashRegisterSettings).GetFields(BindingFlags.Static | BindingFlags.Public).Select(info => (DeviceSetting)info.GetValue(null))),
                 Font0Width = new DeviceNumberSetting
                 {

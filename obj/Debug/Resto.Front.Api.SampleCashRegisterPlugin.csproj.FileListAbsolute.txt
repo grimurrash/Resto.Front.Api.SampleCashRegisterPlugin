@@ -1,65 +1,14 @@
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.dll
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.pdb
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.xml
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.Properties.Resources.resources
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.GenerateResource.cache
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CoreCompileInputs.cache
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CopyComplete
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.dll
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.pdb
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.xml
-C:\Users\Михайл\Desktop\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csprojAssemblyReference.cache
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.xml
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.Properties.Resources.resources
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.GenerateResource.cache
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CoreCompileInputs.cache
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CopyComplete
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.dll
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.dll
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.pdb
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.PaymentTypes.xml
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.Properties.Resources.resources
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.GenerateResource.cache
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CoreCompileInputs.cache
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CopyComplete
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-\\Mac\Home\Desktop\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csprojAssemblyReference.cache
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.dll
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.Properties.Resources.resources
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.GenerateResource.cache
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CoreCompileInputs.cache
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CopyComplete
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V7.dll
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V7.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V7.xml
-C:\Users\fanto\OneDrive\Рабочий стол\МОЕ\Игуадал\Игуадал\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csprojAssemblyReference.cache
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V6.xml
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.Properties.Resources.resources
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.GenerateResource.cache
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CoreCompileInputs.cache
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CopyComplete
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
-C:\Users\fanto\OneDrive\Рабочий стол\Новый плагин 6V\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csprojAssemblyReference.cache
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.AssemblyReference.cache
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.Properties.Resources.resources
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.GenerateResource.cache
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.csproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.dll
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Newtonsoft.Json.dll
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V8.dll
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Newtonsoft.Json.xml
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V8.pdb
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Fr.AC6B0A58.Up2Date
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
