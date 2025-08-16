@@ -109,14 +109,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public List<string> ConvertDocumentStringToArray(string documentString)
         {
             List<string> resultList = new List<string>();
-            var unwantedPrefix = "  <";
+          
             foreach (var s in documentString.Split('\n'))
             {
                 var trimText = s.TrimEnd();
 
-                if (trimText.StartsWith(unwantedPrefix))
+                if (trimText.StartsWith("  <"))
                 {
-                    trimText = trimText.Substring(unwantedPrefix.Length);
+                    trimText = trimText.Substring(2);
                 }
                 resultList.Add(trimText);
             }
@@ -133,15 +133,15 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             text = text.Replace("</doc>", "");
             text = text.Replace("<doc />", "");
             text = text.Replace("<bell />", "");
-            //text = text.Replace("  <f0>", "<f0>");
-            //text = text.Replace("  <f1>", "<f1>");
-            //text = text.Replace("  <f2>", "<f2>");
-            //text = text.Replace("<f0>", "");
-            //text = text.Replace("<f1>", "");
-            //text = text.Replace("<f2>", "");
-            //text = text.Replace("</f0>", "");
-            //text = text.Replace("</f1>", "");
-            //text = text.Replace("</f2>", "");
+            text = text.Replace("  <f0>", "<f0>");
+            text = text.Replace("  <f1>", "<f1>");
+            text = text.Replace("  <f2>", "<f2>");
+            text = text.Replace("<f0>", "");
+            text = text.Replace("<f1>", "");
+            text = text.Replace("<f2>", "");
+            text = text.Replace("</f0>", "");
+            text = text.Replace("</f1>", "");
+            text = text.Replace("</f2>", "");
             text = text.Replace("<f0 />", "");
             text = text.Replace("<f1 />", "");
             text = text.Replace("<f2 />", "");
@@ -360,7 +360,9 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         }
 
         public void AddItemFiscalWithDiscount(string nameItem, decimal price, decimal amount, DiscountType discountType, decimal discountValue)
-        {
+        { 
+            discountValue = Math.Round(discountValue, 2);
+            
             if (isOpenFiscal || isOpenNonFiscal)
             {
                 PluginContext.Log.InfoFormat("AddItemFiscalWithDiscount: nameItem={0} | price={1} | amount={2} | discountType={3} discount={4}", nameItem, price, amount, discountType, discountValue);
