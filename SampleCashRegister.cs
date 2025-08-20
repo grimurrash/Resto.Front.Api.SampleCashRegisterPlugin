@@ -179,17 +179,15 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <returns>Возвращает объект <see cref="CashRegisterResult"/>
         /// При ошибке выкидывать исключение.
         /// </returns>
-        public CashRegisterResult DoCheque(ChequeTask chequeTask, IViewManager viewManager, IOperationDataContext operationDataContext)
+        public CashRegisterResult DoCheque([NotNull] ChequeTask chequeTask, [NotNull] IViewManager viewManager, [NotNull] IOperationDataContext context)
         {
             try
             {
-
                 FR.AddTask(chequeTask);
 
                 FR.ExecuteTask();
 
                 return GetCashRegisterData();
-
             }
             catch (Exception ex)
             {
@@ -391,7 +389,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             PluginContext.Log.InfoFormat("Device: '{0} ({1})'. DirectIo.", DeviceName, deviceId);
 
-            return new DirectIoResult(new Document(), "123123123");
+            return new DirectIoResult();
         }
 
         /// <summary>

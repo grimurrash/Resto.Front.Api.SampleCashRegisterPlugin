@@ -6,9 +6,7 @@ C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\b
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\KasaGE.dll
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Newtonsoft.Json.dll
-C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V8.dll
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Newtonsoft.Json.xml
-C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V8.pdb
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Fr.AC6B0A58.Up2Date
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
 C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
@@ -26,3 +24,5 @@ C:\Users\admin\Source\Repos\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\R
 C:\Users\admin\Source\Repos\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Fr.AC6B0A58.Up2Date
 C:\Users\admin\Source\Repos\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.dll
 C:\Users\admin\Source\Repos\Resto.Front.Api.SampleCashRegisterPlugin\obj\Debug\Resto.Front.Api.SampleCashRegisterPlugin.pdb
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V8.dll
+C:\Users\User\source\repos\grimurrash\Resto.Front.Api.SampleCashRegisterPlugin\bin\Debug\Resto.Front.Api.V8.pdb
