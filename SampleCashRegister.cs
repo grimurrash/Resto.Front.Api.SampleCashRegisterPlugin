@@ -183,127 +183,18 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             try
             {
-                if (FR.isOpenFiscal==false)
-                {
-                    #region Пример чтения настроек
-                    var settings = new SampleCashRegisterSettings(cashRegisterSettings);
-                    // Получаем число
-                    // var fontWidth = settings.NumberSettingExample.Value;
-                    // Получаем строку
-                    // var ofdVersion = settings.StringSettingExample.Value;
-                    // Получаем флаг
-                    // var printOrderNumber = settings.BooleanSettingExample.Value;
-                    // Получаем перечисление
-                    // var fixPrepay = settings.ListSettingExample.Values.First(value => value.IsDefault).Name;
-                    #endregion Пример чтения настроек
-                    bool card = false;
-                    foreach (var type in chequeTask.CardPayments)
-                    {
-                        PluginContext.Log.InfoFormat("CardPayments register id {0} (148)", type.PaymentRegisterId);
-                        card = true;
-                    }
-                    PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed start. (151)", DeviceName, deviceId);
-                    var recT = ReceiptType.Sale;
 
-                    if (chequeTask.IsRefund && card == false)
-                    {
-                        recT = ReceiptType.Return;
-                    }
+                FR.AddTask(chequeTask);
 
-                    if (card == false)
-                    {
-                        PluginContext.Log.InfoFormat("ChequeTask {0}", JsonConvert.SerializeObject(chequeTask));
-                        bool isRound = false;
-                        if (chequeTask.RoundSum != null && chequeTask.RoundSum != 0)
-                        {
-                            isRound = true;
-                        }
+                FR.ExecuteTask();
 
-                        FR.OpenFiscal("007", "7", recT);
-                        FR.AddTextFiscal(chequeTask.TextAfterCheque);
-                        PluginContext.Log.InfoFormat("Start print sales");
-                        foreach (ChequeSale sale in chequeTask.Sales.OrderBy(s => s.Discount))
-                        {
-                            //decimal price = sale.Sum ?? 0;
-                            decimal price = sale.Price ?? 0;
-                            decimal amount = sale.Amount ?? 1;
-                            decimal discountPercent = sale.Discount ?? 0;
-                            decimal discountSum = sale.DiscountSum ?? 0;
-                            decimal increasetPercent = sale.Increase ?? 0;
-                            decimal increaseSum = sale.IncreaseSum ?? 0;
-
-                            if (price == 0 && discountPercent == 0 && discountSum == 0)
-                            {
-                                continue;
-                            }
-
-                            if (price > 0)
-                            {
-                                //if (amount > 0)
-                                //{
-                                //    price /= amount;
-                                //}
-
-                                if (isRound)
-                                {
-                                    price = Math.Round(price);
-                                }
-                                else
-                                {
-                                    price = Math.Round(price, 2);
-                                }
-                            }
-
-                            if (sale.Discount > 0)
-                            {
-                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountByPercentage, sale.Discount ?? 0);
-                            }
-                            else if (sale.DiscountSum > 0 && sale.Discount == 0)
-                            {
-                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.DiscountBySum, sale.DiscountSum ?? 0);
-                            }
-                            else if (sale.Increase > 0)
-                            {
-                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeByPercentage, sale.Increase ?? 0);
-                            }
-                            else if (sale.IncreaseSum > 0 && sale.Increase == 0)
-                            {
-                                FR.AddItemFiscalWithDiscount(sale.Name, price, amount, DiscountType.SurchargeBySum, sale.IncreaseSum ?? 0);
-                            }
-                            else
-                            {
-                                FR.AddItemFiscalNotDiscount(sale.Name, price, amount);
-                            }
-                        }
-                        PluginContext.Log.InfoFormat("End print sales");
-                        FR.AddTextFiscal(chequeTask.TextBeforeCheque);
-                        FR.PrintFiscal();
-                    }
-                }
-                else
-                {
-                    FR.AddTask(chequeTask);
-                }
-                PluginContext.Log.InfoFormat("Device: '{0} ({1})'. Cheque printed. (176)", DeviceName, deviceId);
-                
-                var result = GetCashRegisterData();
-                
-                return result;
+                return GetCashRegisterData();
 
             }
             catch (Exception ex)
             {
                 PluginContext.Log.WarnFormat("Device: '{0} ({1})' Exception: {2} file = {3} line = {4} (286) details {5}", DeviceName, deviceId, ex.Message, ex.Source, ex.TargetSite, ex.StackTrace);
                 throw new Exception($"Print error: {ex.Message}");
-            }
-        }
-
-        public void LogLastError()
-        {
-            var error = FR.GetLastError();
-            if (error != "")
-            {
-                PluginContext.Log.WarnFormat("Device: '{0} ({1})' ErrorCodeFR: {2} (185)", DeviceName, deviceId, error);
             }
         }
 
@@ -388,26 +279,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         {
             try
             {
-                PluginContext.Log.InfoFormat("PrintText {0}", task.Document.Markup.ToString());
-
-
-                if (FR.isOpenNonFiscal==false)
-                {
-                    FR.OpenNonFiscal();
-                    string text = FR.ConvertDocumentToString(task.Document);
-                    
-                    foreach (var s in FR.ConvertDocumentStringToArray(text))
-                    {
-                        FR.PrintTextNonFiscal(s);
-                    }
-
-                    FR.PrintNonFiscal();
-                }
-                else
-                {
-                    FR.AddTask(task.Document);
-                }
-                PluginContext.Log.InfoFormat("Device: '{0} ({1})' printed text {2} (283)", DeviceName, deviceId, task.Document.Markup.ToString());
+                FR.AddTask(task.Document);
+                FR.ExecuteTask();
             }
             catch (Exception ex)
             {
