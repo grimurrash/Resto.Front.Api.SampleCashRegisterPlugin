@@ -23,8 +23,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public bool isOpenFiscal = false;
         public bool isOpenNonFiscal = false;
 
+        string _lastError = "";
+       
+        string LastError
+        {
+            get { return _lastError; }
+            set { _lastError = value.Trim(); }
+        }
 
-        string lastError = "";
         readonly string comPort = "";
 
         readonly List<PrintTasks> tasks = new List<PrintTasks>();
@@ -48,7 +54,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
 
             PluginContext.Log.InfoFormat("Start openNonFiscal");
-            lastError = ecr.OpenNonFiscalReceipt().ErrorCode;
+            LastError = ecr.OpenNonFiscalReceipt().ErrorCode;
             ExMessage("OpenNonFiscalReceipt");
             isOpenNonFiscal = true;
         }
@@ -60,31 +66,33 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
 
             PluginContext.Log.InfoFormat("Start openFiscal");
-            lastError = ecr.OpenFiscalReceipt(session, waiter, receiptType).ErrorCode;
+            LastError = ecr.OpenFiscalReceipt(session, waiter, receiptType).ErrorCode;
 
-            if (!string.IsNullOrWhiteSpace(lastError))
+            if (!string.IsNullOrWhiteSpace(LastError))
             {
                 try
                 {
-                    if (lastError == "-111016\t")
+                    if (LastError == "-111015")
                     {
-                        lastError = ecr.VoidOpenFiscalReceipt().ErrorCode;
-                        ExMessage("VoidOpenFiscalReceipt");
-                    }
-                    else if (lastError == "-111015\t")
-                    {
-                        lastError = ecr.Total(PaymentMode.Cash).ErrorCode;
+                        LastError = ecr.Total(PaymentMode.Cash).ErrorCode;
+
+                        if (LastError == "-111065")
+                        {
+                            LastError = ecr.VoidOpenFiscalReceipt().ErrorCode;
+                            ExMessage("VoidOpenFiscalReceipt");
+                            LastError = ecr.Total(PaymentMode.Cash).ErrorCode;
+                        }
                         ExMessage("Total");
-                        lastError = ecr.CloseFiscalReceipt().ErrorCode;
+                        LastError = ecr.CloseFiscalReceipt().ErrorCode;
                         ExMessage("CloseFiscalReceipt ");
-                    }
+                    } 
                 } catch(Exception ex)
                 {
                     PluginContext.Log.InfoFormat("ERROR VoidOpenFiscalReceipt: {0}", ex.Message);
                 }
 
 
-                lastError = ecr.OpenFiscalReceipt(session, waiter, receiptType).ErrorCode;
+                LastError = ecr.OpenFiscalReceipt(session, waiter, receiptType).ErrorCode;
             }
 
             ExMessage("OpenFiscalReceipt");
@@ -94,7 +102,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public void OpenDrawler()
         {
             PluginContext.Log.InfoFormat("Start openDrawler");
-            lastError = ecr.OpenDrawer(10).ErrorCode;
+            LastError = ecr.OpenDrawer(10).ErrorCode;
             ExMessage("OpenDrawer");
         }
 
@@ -103,7 +111,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             try
             {
                 PluginContext.Log.InfoFormat("Start InCash");
-                lastError = ecr.CashInCashOutOperation(Cash.In, amount).ErrorCode;
+                LastError = ecr.CashInCashOutOperation(Cash.In, amount).ErrorCode;
                 ExMessage("CashInCashOutOperation InCash");
             }
             catch (KasaGE.Core.FiscalIOException ex)
@@ -118,7 +126,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             try
             {
                 PluginContext.Log.InfoFormat("Start OutCash");
-                lastError = ecr.CashInCashOutOperation(Cash.Out, amount).ErrorCode;
+                LastError = ecr.CashInCashOutOperation(Cash.Out, amount).ErrorCode;
                 ExMessage("CashInCashOutOperation OutCash");
             }
             catch (KasaGE.Core.FiscalIOException ex)
@@ -130,19 +138,26 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
         private void ExMessage(string errorFunction = "")
         {
-            if (string.IsNullOrWhiteSpace(lastError))
+            if (string.IsNullOrWhiteSpace(LastError))
             {
                 return;
             }
+            
+            PluginContext.Log.ErrorFormat("ERROR {0}: \"{1}\"", errorFunction, LastError);
 
-            PluginContext.Log.ErrorFormat("ERROR {0}: {1}", errorFunction, lastError);
-
-            if (lastError == "-111050\t")
+            try
             {
-                throw new Exception("Critical Fiscal error");
+                if (LastError == "-111050")
+                {
+                    throw new Exception("Critical Fiscal error");
+                }
+            } catch (Exception ex)
+            {
+                PluginContext.Log.ErrorFormat("ERROR handler error message: {1}", ex.Message);
             }
 
-            lastError = "";
+
+            LastError = "";
         }
 
         /// <summary>
@@ -154,7 +169,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         /// <returns>Текст с заменёнными QR-кодами</returns>
         public static string ReplaceQRCodes(string text, int moduleSize = 4, string errorCorrection = "M")
         {
-            if (string.IsNullOrEmpty(text))
+            if (string.IsNullOrWhiteSpace(text))
                 return text;
 
             // ESC (0x1B) — управляющий символ для команд FP-700
@@ -232,18 +247,13 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 foreach (var trimText in ConvertDocumentStringToArray(text))
                 {
                     PluginContext.Log.InfoFormat("AddTextFiscal: s=\"{0}\"", trimText);
-                    lastError = ecr.AddTextToFiscalReceipt(trimText).ErrorCode;
+                    LastError = ecr.AddTextToFiscalReceipt(trimText).ErrorCode;
                 }
                 
                 ExMessage("AddTextToFiscalReceipt");
             }
         }
-        public string GetLastError()
-        {
-            var error = lastError;
-            lastError = "";
-            return error;
-        }
+
 
         public void AddTask(ChequeTask chequeTask)
         {
@@ -266,7 +276,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 return;
             }
 
-            if (isOpenFiscal == true)
+            if (!isReplay && (isOpenFiscal || isOpenNonFiscal))
             {
                 this.AddTask(chequeTask);
                 return;
@@ -352,14 +362,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 PluginContext.Log.InfoFormat("End print sales");
 
                 AddTextFiscal(chequeTask.TextBeforeCheque);
-                   
-                var printTry = 0;
-                var isSuccess = false;
-                do
-                {
-                    printTry++;
-                    isSuccess = this.PrintFiscal(PaymentMode.Cash, printTry);
-                } while (printTry < 3 && isSuccess == false);
+
+                var isSuccess = this.PrintFiscal(PaymentMode.Cash);
 
                 if (!isSuccess)
                 {
@@ -385,7 +389,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
         private void ExecuteNotFiscalTask(Document document)
         {
-            if (isOpenNonFiscal == true)
+            if (isOpenNonFiscal || isOpenNonFiscal)
             {
                 AddTask(document);
                 return;
@@ -405,18 +409,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                     resultText += s + "\n";
                 }
 
-                var printTry = 0;
-                var isSuccess = false;
-                do
-                {
-                    printTry++;
-                    isSuccess = this.PrintNonFiscal(printTry);
-                } while (printTry < 3 && isSuccess == false);
-
-                if (!isSuccess)
-                {
-                    throw new Exception("Error close not fiscal print");
-                }
+                this.PrintNonFiscal();
 
                 PluginContext.Log.InfoFormat("Device: printed text {0} (283)", resultText);
             }
@@ -464,9 +457,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         public void AddItemFiscalNotDiscount(string nameItem, decimal price, decimal amount)
         {
             PluginContext.Log.InfoFormat("AddItemFiscalNotDiscount: nameItem={0} | price={1} | amount={2}", nameItem, price, amount);
-            lastError = ecr.RegisterSale(nameItem, price, amount, 1).ErrorCode;
+            LastError = ecr.RegisterSale(nameItem, price, amount, 1).ErrorCode;
             ExMessage("RegisterSale");
-            Thread.Sleep(200);
         }
 
         public void AddItemFiscalWithDiscount(string nameItem, decimal price, decimal amount, DiscountType discountType, decimal discountValue)
@@ -474,9 +466,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             discountValue = Math.Round(discountValue, 2);
 
             PluginContext.Log.InfoFormat("AddItemFiscalWithDiscount: nameItem={0} | price={1} | amount={2} | discountType={3} discount={4}", nameItem, price, amount, discountType, discountValue);
-            lastError = ecr.RegisterSale(nameItem, price, amount, 1, discountType, discountValue).ErrorCode;
+            LastError = ecr.RegisterSale(nameItem, price, amount, 1, discountType, discountValue).ErrorCode;
             ExMessage("RegisterSale");
-            Thread.Sleep(200);
         }
 
         public void PrintTextNonFiscal(string text)
@@ -487,62 +478,59 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
 
             PluginContext.Log.InfoFormat("PrintTextNonFiscal:  text={0}", text);
-            lastError = ecr.AddTextToNonFiscalReceipt(text).ErrorCode;
+            LastError = ecr.AddTextToNonFiscalReceipt(text).ErrorCode;
             ExMessage("AddTextToNonFiscalReceipt");
         }
 
-        public bool PrintNonFiscal(int printTry)
+        public void PrintNonFiscal()
         {
             if (!isOpenNonFiscal)
             {
-                OpenNonFiscal();
-                return false;
+                return;
             }
 
-            PluginContext.Log.InfoFormat("PrintNonFiscal " + printTry);
-            lastError = ecr.CloseNonFiscalReceipt().ErrorCode;
-
-            if (!string.IsNullOrWhiteSpace(lastError))
-            {
-                ExMessage("CloseNonFiscalReceipt " + printTry);
-                return false;
-            }
-            
+            PluginContext.Log.InfoFormat("PrintNonFiscal");
+            LastError = ecr.CloseNonFiscalReceipt().ErrorCode;
             isOpenNonFiscal = false;
-            return true;
+            return;
         }
 
-        public bool PrintFiscal(PaymentMode PM = PaymentMode.Cash, int printTry = 1)
+        public bool PrintFiscal(PaymentMode PM = PaymentMode.Cash)
         {
             if (!isOpenFiscal)
             {
                 return false;
             }
 
-            PluginContext.Log.InfoFormat("PrintFiscal " + printTry);
-            lastError = ecr.Total(PM).ErrorCode;
+            Thread.Sleep(500);
+            PluginContext.Log.InfoFormat("PrintFiscal");
+            LastError = ecr.Total(PM).ErrorCode;
 
-            if (!string.IsNullOrWhiteSpace(lastError) && lastError.TrimEnd('\t') == "-111065")
+            if (!string.IsNullOrWhiteSpace(LastError) && LastError == "-111065")
             {
-                ExMessage("Total " + printTry);
+                ExMessage("Total");
+                PluginContext.Log.WarnFormat("VoidOpenFiscalReceipt start");
                 try
                 {
-                    lastError = ecr.VoidOpenFiscalReceipt().ErrorCode;
-                    ExMessage("VoidOpenFiscalReceipt " + printTry);
+                    LastError = ecr.VoidOpenFiscalReceipt().ErrorCode;
+                    ExMessage("VoidOpenFiscalReceipt ");
+                    LastError = ecr.CloseFiscalReceipt().ErrorCode;
+                    ExMessage("CloseFiscalReceipt ");
                 }
                 catch (Exception e)
                 {
                     PluginContext.Log.WarnFormat("ERROR VoidOpenFiscalReceipt {0}", e.Message);
                 }
-                lastError = ecr.Total(PM).ErrorCode;
+                isOpenFiscal = false;
+                PluginContext.Log.WarnFormat("VoidOpenFiscalReceipt finished.");
+                return false;
             }
 
-            ExMessage("Total" + printTry);
-            lastError = ecr.CloseFiscalReceipt().ErrorCode;
-            ExMessage("CloseFiscalReceipt " + printTry);
+            ExMessage("Total");
+            LastError = ecr.CloseFiscalReceipt().ErrorCode;
+            ExMessage("CloseFiscalReceipt");
 
             isOpenFiscal = false;
-            Thread.Sleep(1000);
             return true;
         }
 
@@ -551,15 +539,15 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             try
             {
                 PluginContext.Log.InfoFormat("PrintReport");
-                lastError = ecr.PrintReport(typeReport).ErrorCode;
-                lastError = "";
+                LastError = ecr.PrintReport(typeReport).ErrorCode;
+                LastError = "";
             }
             catch (Exception ex)
             {
                 PluginContext.Log.WarnFormat("printReport ERROR: {2} details {3}", ex.Message, ex.InnerException.Message);
                 ecr = new Dp25(comPort);
-                lastError = ecr.PrintReport(typeReport).ErrorCode;
-                lastError = "";
+                LastError = ecr.PrintReport(typeReport).ErrorCode;
+                LastError = "";
             }
         }
         public void Dispose()
