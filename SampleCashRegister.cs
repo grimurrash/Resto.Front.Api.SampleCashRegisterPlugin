@@ -282,8 +282,8 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
             catch (Exception ex)
             {
-                PluginContext.Log.WarnFormat("Device: '{0} ({1})' Exception: {2} file = {3} line = {4} (287) details {5}", DeviceName, deviceId, ex.Message, ex.Source, ex.TargetSite, ex.StackTrace);
-                throw new Exception($"Print error: {ex.Message}");
+                PluginContext.Log.WarnFormat("Device: '{0} ({1})'\nException: {2}\nFile = {3}\nLine = {4}\nTrace:\n{5}", DeviceName, deviceId, ex.Message, ex.Source, ex.TargetSite, ex.StackTrace);
+                throw ex;
             }
 
             return GetCashRegisterData();
