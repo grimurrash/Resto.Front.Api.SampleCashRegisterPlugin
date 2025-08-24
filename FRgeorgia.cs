@@ -29,7 +29,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         string LastError
         {
             get { return _lastError; }
-            set { _lastError = value.Trim(); }
+            set { _lastError = string.IsNullOrWhiteSpace(value) ? "" : value.Trim(); }
         }
 
         readonly string comPort = "";
@@ -366,7 +366,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                         return;
                     } else
                     {
-                        throw new Exception("Error close fiscal printer");
+                        throw new Exception("Error print fiscal cheque");
                     }
                 }
 
@@ -374,12 +374,17 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
             catch (Exception ex)
             {
+                if (isReplay)
+                {
+                    throw ex;
+                }
+
                 if (isOpenFiscal)
                 {
                     this.VoidOpenFiscalReceipt();
                 }
                 isOpenFiscal = false;
-                PluginContext.Log.WarnFormat("ExecuteNotFiscalTask ERROR: {0} details:\n{1}", ex.Message, ex.StackTrace);
+                PluginContext.Log.ErrorFormat("ExecuteFiscalTask ERROR: {0}\nTrace:\n{1}", ex.Message, ex.StackTrace);
                 throw ex;
             }
         }
