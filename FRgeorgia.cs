@@ -195,7 +195,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             return name.Trim();
         }
 
-        public string ConvertDocumentToString(Data.Print.Document document)
+        public string ConvertDocumentToString(Document document)
         {
             string text = document.Markup.ToString();
 
@@ -432,23 +432,29 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             execute = true;
 
             PluginContext.Log.InfoFormat("Start ExecuteTask");
+            PluginContext.Log.InfoFormat("Task count {0}", tasks.Count);
 
-            var sTasks = new List<PrintTasks>(tasks);
-            tasks.Clear();
-            PluginContext.Log.InfoFormat("Task count {0}", sTasks.Count);
-
+            var sTasks = tasks.ToArray();
             foreach (var task in sTasks)
             {
-                if (task.type == "fiscal")
+                try
                 {
-                    ExecuteFiscalTask(task.ChequeTask, false);
-                }
-                else
+                    if (task.type == "fiscal")
+                    {
+                        ExecuteFiscalTask(task.ChequeTask, false);
+                    }
+                    else
+                    {
+                        ExecuteNotFiscalTask(task.document);
+                    }
+                    tasks.Remove(task);
+                } catch (Exception e)
                 {
-                    ExecuteNotFiscalTask(task.document);
+                    tasks.Remove(task);
+                    execute = false;
+                    throw e;
                 }
             }
-            sTasks.Clear();
             execute = false;
 
             if (tasks.Count > 0)
@@ -513,15 +519,6 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             {
                 PluginContext.Log.WarnFormat("ERROR VoidOpenFiscalReceipt {0} \n{1}", e.Message, e.StackTrace);
             }
-            
-            try
-            {
-                LastError = ecr.CloseFiscalReceipt().ErrorCode;
-                ExMessage("CloseFiscalReceipt");
-            } catch (Exception e)
-            {
-                PluginContext.Log.WarnFormat("ERROR CloseFiscalReceipt {0} \n{1}", e.Message, e.StackTrace);
-            }
 
             PluginContext.Log.WarnFormat("VoidOpenFiscalReceipt finished.");
         }
@@ -533,10 +530,10 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 return false;
             }
 
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             PluginContext.Log.InfoFormat("PrintFiscal");
 
-           LastError = ecr.Total(PM).ErrorCode;
+            LastError = ecr.Total(PM).ErrorCode;
             ExMessage("Total");
 
             LastError = ecr.CloseFiscalReceipt().ErrorCode;
