@@ -29,7 +29,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
         string LastError
         {
             get { return _lastError; }
-            set { _lastError = string.IsNullOrWhiteSpace(value) ? "" : value.Trim(); }
+            set { _lastError = string.IsNullOrWhiteSpace(value) ? "" : (value).Trim(); }
         }
 
         readonly string comPort = "";
@@ -374,6 +374,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             }
             catch (Exception ex)
             {
+                PluginContext.Log.ErrorFormat("Error: {0}\nTrace:\n{1}", ex.Message, ex.StackTrace);
                 if (isReplay)
                 {
                     throw ex;
@@ -518,6 +519,15 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             catch (Exception e)
             {
                 PluginContext.Log.WarnFormat("ERROR VoidOpenFiscalReceipt {0} \n{1}", e.Message, e.StackTrace);
+            }
+
+            try
+            {
+                LastError = ecr.CloseFiscalReceipt().ErrorCode;
+                ExMessage("CloseFiscalReceipt");
+            } catch (Exception e)
+            {
+                PluginContext.Log.WarnFormat("ERROR CloseFiscalReceipt {0} \n{1}", e.Message, e.StackTrace);
             }
 
             PluginContext.Log.WarnFormat("VoidOpenFiscalReceipt finished.");
