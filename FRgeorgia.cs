@@ -66,6 +66,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 return;
             }
 
+            Thread.Sleep(2000);
             PluginContext.Log.InfoFormat("Start openFiscal");
             LastError = ecr.OpenFiscalReceipt(session, waiter, receiptType).ErrorCode;
 
@@ -261,14 +262,14 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
             tasks.Add(task);
         }
 
-        private void ExecuteFiscalTask(ChequeTask chequeTask, bool isReplay)
+        private void ExecuteFiscalTask(ChequeTask chequeTask)
         {
             if (chequeTask.CardPayments.Count > 0)
             {
                 return;
             }
 
-            if (!isReplay && (isOpenFiscal || isOpenNonFiscal))
+            if (isOpenFiscal || isOpenNonFiscal)
             {
                 this.AddTask(chequeTask);
                 return;
@@ -359,27 +360,13 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
                 if (!isSuccess)
                 {
-                    if (!isReplay)
-                    {
-                        PluginContext.Log.WarnFormat("Replay print cheque");
-                        ExecuteFiscalTask(chequeTask, true);
-                        return;
-                    } else
-                    {
-                        throw new Exception("Error print fiscal cheque");
-                    }
+                    throw new Exception("Error print fiscal cheque");
                 }
 
                 PluginContext.Log.InfoFormat("Device: Cheque printed. {0} (176)", chequeTask.OrderId);
             }
             catch (Exception ex)
             {
-                PluginContext.Log.ErrorFormat("Error: {0}\nTrace:\n{1}", ex.Message, ex.StackTrace);
-                if (isReplay)
-                {
-                    throw ex;
-                }
-
                 if (isOpenFiscal)
                 {
                     this.VoidOpenFiscalReceipt();
@@ -442,7 +429,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 {
                     if (task.type == "fiscal")
                     {
-                        ExecuteFiscalTask(task.ChequeTask, false);
+                        ExecuteFiscalTask(task.ChequeTask);
                     }
                     else
                     {
@@ -540,7 +527,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 return false;
             }
 
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             PluginContext.Log.InfoFormat("PrintFiscal");
 
             LastError = ecr.Total(PM).ErrorCode;
