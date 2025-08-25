@@ -66,7 +66,6 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
                 return;
             }
 
-            Thread.Sleep(2000);
             PluginContext.Log.InfoFormat("Start openFiscal");
             LastError = ecr.OpenFiscalReceipt(session, waiter, receiptType).ErrorCode;
 
@@ -84,6 +83,7 @@ namespace Resto.Front.Api.SampleCashRegisterPlugin
 
             ExMessage("OpenFiscalReceipt");
             isOpenFiscal = true;
+            Thread.Sleep(2000);
         }
 
         public void OpenDrawler()
